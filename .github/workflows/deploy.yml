@@ -1,0 +1,25 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main # This can be changed to whatever branch you're working with
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Upload index.html to EC2
+        run: |
+          scp -i /tmp/my-ec2-key.pem -o StrictHostKeyChecking=no index.html ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/var/www/html/index.html
+        env:
+          EC2_PUBLIC_IP: ${{ secrets.EC2_PUBLIC_IP }}
